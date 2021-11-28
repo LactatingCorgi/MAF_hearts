@@ -1,37 +1,48 @@
 import random as rd
+import greedy
+import probability
+import twentysix
+import lesscolors
 
 class Player:
-    def __init__(self, name, hand):
+
+    def __init__(self, name, hand, strategy):
         self.name = name
         self.hand = hand
         self.stack = []
+        match strategy:
+            case "greedy":
+                self.strategy = greedy.Greedy()
+            case "probability":
+                self.strategy = probability.Probability()
+            case "twentysix":
+                self.strategy = twentysix.TwentySix()
+            case "lesscolors":
+                self.strategy = lesscolors.LessColors()
         
     def reset(self, hand):
+        '''
+        Resets itself - basically forgets everything that happened last round
+        '''
         self.hand = hand
         self.stack = []
+        self.strategy.clear()
     
     def pass_cards(self):
         '''
-        Selects three card from it's hand to pass over
+        Selects three card from it's hand to pass over, according to strategy
         '''
         
-        #For now, it selects randomly
-        cards_to_pass = []
-        for i in range(3):
-            rx = rd.randint(0, len(self.hand) - 1)
-            card = self.hand[rx]
-            cards_to_pass.append(card)
-            self.hand.remove(card)
-            
-        return cards_to_pass
+        return self.strategy.pass_cards(self.hand)
         
     def receive_cards(self, new_cards):
         '''
         Append the list of cards by cards received from one of the opponents
         '''
-        
+
         for card in new_cards:
             self.hand.append(card)
+        #print(len(self.hand))
             
     def receive_stack(self, stack):
         '''

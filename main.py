@@ -18,7 +18,7 @@ def calculate_point_value(stack):
     value = 0
     for item in stack:
         if item[0] == 'Spades':
-            value = value + 12
+            value = value + 13
         else:
             value = value + 1
             
@@ -38,10 +38,10 @@ def deal():
 
 #Creating the bots with the hands and the scoreboard
 hands = deal()
-bot1 = pl.Player("bot1", hands[0])
-bot2 = pl.Player("bot2", hands[1])
-bot3 = pl.Player("bot3", hands[2])
-bot4 = pl.Player("bot4", hands[3])
+bot1 = pl.Player("bot1", hands[0], "greedy")
+bot2 = pl.Player("bot2", hands[1], "probability")
+bot3 = pl.Player("bot3", hands[2], "twentysix")
+bot4 = pl.Player("bot4", hands[3], "lesscolors")
 
 scoreboard = {}
 scoreboard[bot1] = 0
@@ -61,22 +61,37 @@ while max(scoreboard.values()) < 100:
             pass
         case 1:
             #Every first round, 1 passes to 2, 2 passes to 3, 3 passes to 4, 4 passes to 1 (so the player to the right)
-            bot1.receive_cards(bot4.pass_cards())
-            bot2.receive_cards(bot1.pass_cards())
-            bot3.receive_cards(bot2.pass_cards())
-            bot4.receive_cards(bot3.pass_cards())
+            cards_bot1 = bot4.pass_cards()
+            cards_bot2 = bot1.pass_cards()
+            cards_bot3 = bot2.pass_cards()
+            cards_bot4 = bot3.pass_cards()
+            
+            bot1.receive_cards(cards_bot1)
+            bot2.receive_cards(cards_bot2)
+            bot3.receive_cards(cards_bot3)
+            bot4.receive_cards(cards_bot4)
         case 2:
             #Every second round, 1 passes to 4, 2 passes to 1, 3 passes to 2, 4 passes to 3 (so the player to the left)
-            bot1.receive_cards(bot2.pass_cards())
-            bot2.receive_cards(bot3.pass_cards())
-            bot3.receive_cards(bot4.pass_cards())
-            bot4.receive_cards(bot1.pass_cards())
+            cards_bot1 = bot2.pass_cards()
+            cards_bot2 = bot3.pass_cards()
+            cards_bot3 = bot4.pass_cards()
+            cards_bot4 = bot1.pass_cards()
+            
+            bot1.receive_cards(cards_bot1)
+            bot2.receive_cards(cards_bot2)
+            bot3.receive_cards(cards_bot3)
+            bot4.receive_cards(cards_bot4)
         case 3:
             #Every first round, 1 passes to 3, 2 passes to 4, 3 passes to 1, 4 passes to 2 (so the player on the opposite side)
-            bot1.receive_cards(bot3.pass_cards())
-            bot2.receive_cards(bot4.pass_cards())
-            bot3.receive_cards(bot1.pass_cards())
-            bot4.receive_cards(bot2.pass_cards())
+            cards_bot1 = bot3.pass_cards()
+            cards_bot2 = bot4.pass_cards()
+            cards_bot3 = bot1.pass_cards()
+            cards_bot4 = bot2.pass_cards()
+            
+            bot1.receive_cards(cards_bot1)
+            bot2.receive_cards(cards_bot2)
+            bot3.receive_cards(cards_bot3)
+            bot4.receive_cards(cards_bot4)
     
     #Playing the actual round
     while len(bot1.hand) > 0:
@@ -118,10 +133,8 @@ while max(scoreboard.values()) < 100:
     deck = [(color, number) for color in card_colors for number in card_numbers]
     hands = deal()
     
-    print("---------------------------")
     for key in scoreboard.keys():
         scoreboard[key] = scoreboard[key] + calculate_point_value(key.stack)
-        print(key.name, scoreboard[key])
     
     bot1.reset(hands[0])
     bot2.reset(hands[1])
@@ -129,9 +142,11 @@ while max(scoreboard.values()) < 100:
     bot4.reset(hands[3])        
     
     
+print("---------------------------")
 winner_value = min(scoreboard.values())
 for key in scoreboard.keys():
+    print(key.name, " : ", scoreboard[key])
     if scoreboard[key] == winner_value:
        winner_key = key
 
-print(winner_key.name, "won.")       
+print("\n", winner_key.name, "won.")       
